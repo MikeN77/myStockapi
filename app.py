@@ -54,6 +54,27 @@ if __name__ == '__main__':
     # Stellt sicher, dass Sie den Debug-Modus verwenden, um Fehler direkt zu sehen
     app.run(debug=True, port=5000)
 
+# =======================================================
+# --- ENDPUNKT 3: AKTUELLE DATEN/KENNZAHLEN ---
+# =======================================================
+@app.route('/api/info/<ticker>', methods=['GET'])
+def get_stock_info(ticker):
+    try:
+        stock = yf.Ticker(ticker.upper())
+        
+        # Ruft das große Dictionary mit allen aktuellen Informationen ab
+        info_data = stock.info
+        
+        # jsonify konvertiert das Python Dictionary direkt in JSON.
+        # Hinweis: Das 'info'-Dictionary ist sehr groß und enthält viele Felder.
+        return jsonify({
+            "ticker": ticker.upper(),
+            "info": info_data
+        })
+    except Exception as e:
+        # Fehlerbehandlung
+        return jsonify({"error": f"Fehler beim Abrufen der Info-Daten für {ticker}: {str(e)}"}), 500
+
 # Endpunkt:
 @app.route('/', methods=['GET'])
 def home():
