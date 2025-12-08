@@ -42,8 +42,8 @@ def get_stock_news(ticker):
         # jsonify konvertiert die Python-Liste direkt in ein JSON-Array.
         return jsonify({
             "ticker": ticker.upper(),
-            # Begrenzt die Ausgabe auf die 10 neuesten Artikel zur Übersicht
-            "news": news_list[:10]
+            # Begrenzt die Ausgabe auf die 5 neuesten Artikel zur Übersicht
+            "news": news_list[:5]
         })
     except Exception as e:
         # Gibt eine HTTP 500 Fehlermeldung zurück
