@@ -53,3 +53,8 @@ def get_stock_news(ticker):
 if __name__ == '__main__':
     # Stellt sicher, dass Sie den Debug-Modus verwenden, um Fehler direkt zu sehen
     app.run(debug=True, port=5000)
+
+# Endpunkt:
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({"status": "API is running", "version": "1.0"}), 200
