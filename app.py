@@ -1,45 +1,55 @@
 from flask import Flask, jsonify
-from flask_cors import CORS
+from flask_cors import CORS 
 import yfinance as yf
-import json # Für die Datenverarbeitung
+# Hinweis: Die 'json'-Bibliothek ist für dieses Setup nicht zwingend notwendig
+# import json 
 
 app = Flask(__name__)
 CORS(app) 
 
-# --- ENDPUNKT 1: HISTORISCHE DATEN (Bereits vorhanden) ---
+# =======================================================
+# --- ENDPUNKT 1: HISTORISCHE DATEN (ALT) ---
+# =======================================================
 @app.route('/api/stock/<ticker>', methods=['GET'])
 def get_stock_data(ticker):
     try:
         stock = yf.Ticker(ticker.upper())
-        # ... (der Code für historische Daten bleibt hier)
         hist = stock.history(period="1mo")
+        
+        # Konvertiert das Pandas DataFrame in JSON, kompatibel mit JavaScript
+        # Wichtig: Wir speichern hier den JSON-STRING im 'data'-Feld.
         data = hist.reset_index().to_json(orient='records', date_format='iso')
-        return jsonify({"ticker": ticker.upper(), "data": data})
+        
+        return jsonify({
+            "ticker": ticker.upper(), 
+            "data": data
+        })
     except Exception as e:
+        # Gibt eine HTTP 500 Fehlermeldung mit der Fehlerbeschreibung zurück
         return jsonify({"error": str(e)}), 500
 
-# ----------------------------------------------------
-# --- NEUER ENDPUNKT 2: NACHRICHTEN HINZUFÜGEN ---
-# ----------------------------------------------------
+# =======================================================
+# --- ENDPUNKT 2: AKTUELLE NACHRICHTEN (NEU) ---
+# =======================================================
 @app.route('/api/news/<ticker>', methods=['GET'])
 def get_stock_news(ticker):
     try:
         stock = yf.Ticker(ticker.upper())
         
-        # Ruft die Liste der News-Dictionaries ab
+        # Ruft die Liste der News-Dictionaries ab. yfinance liefert sie bereits als Python-Liste.
         news_list = stock.news
         
-        # Begrenzen Sie die Ausgabe auf z.B. die 10 neuesten Artikel
-        # und formatieren Sie es so, dass es direkt als JSON gesendet werden kann
-        
+        # jsonify konvertiert die Python-Liste direkt in ein JSON-Array.
         return jsonify({
             "ticker": ticker.upper(),
+            # Begrenzt die Ausgabe auf die 10 neuesten Artikel zur Übersicht
             "news": news_list[:10]
         })
     except Exception as e:
-        # Hier fangen wir Fehler ab, z.B. wenn der Ticker nicht gefunden wird
+        # Gibt eine HTTP 500 Fehlermeldung zurück
         return jsonify({"error": f"Fehler beim Abrufen der Nachrichten für {ticker}: {str(e)}"}), 500
 
 
 if __name__ == '__main__':
+    # Stellt sicher, dass Sie den Debug-Modus verwenden, um Fehler direkt zu sehen
     app.run(debug=True, port=5000)
